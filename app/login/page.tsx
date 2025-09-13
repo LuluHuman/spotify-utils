@@ -41,7 +41,7 @@ export default function Login() {
 			<div className="bg-[#121212] text-white flex flex-col items-center justify-center md:w-fit md:px-52 px-8 py-8 md:rounded-2xl w-full h-fit m-8">
 				{user ? (
 					<>
-						<h1 className="font-bold text-2xl mb-8">Loged in as</h1>
+						<h1 className="font-bold text-2xl mb-8">Logged in as</h1>
 						<Image
 							className="rounded-full size-12"
 							width={user.images[1].width}
