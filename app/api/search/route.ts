@@ -17,11 +17,14 @@ export async function GET(req: NextRequest) {
         const metaAlbum = (await getAlbum(metaTrack.album.gid)).data
 
         return Response.json({ track, metaTrack, metaAlbum })
-    }
-    catch (err) {
-        return Response.json({ err }, { status: err.status || 500 })
-    }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+        return new Response(err
+            ? JSON.stringify(err.config?.data || { err })
+            : JSON.stringify({ err: "Unknown Error" }
+            ), { status: err.status || 500 })
+    }
 }
 
 function idToGid(id: string) {

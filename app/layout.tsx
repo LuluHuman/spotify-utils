@@ -6,6 +6,7 @@ import "./globals.css";
 import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Spotify } from "@/lib/api";
+import { Suspense } from "react";
 
 const menuEntries: { [key: string]: string } = {
 	"/track-info": "Track Info",
@@ -92,7 +93,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 					<TopBar menuEntries={menuEntries} />
 				</header>
 				<SpotifyContext.Provider value={{ SpotifyClient, setSpotifyClient }}>
-					{children}
+					<Suspense>{children}</Suspense>
 				</SpotifyContext.Provider>
 			</body>
 		</html>

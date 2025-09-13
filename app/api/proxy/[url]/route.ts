@@ -52,7 +52,10 @@ async function handler(
         return new Response(request.data, { status: request.status, headers: resHeaders })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-        return new Response(err ? JSON.stringify(err.config?.data) || { err } : { err: "Unknown Error" }, { status: err.status || 500 })
+        return new Response(err
+            ? JSON.stringify(err.config?.data || { err })
+            : JSON.stringify({ err: "Unknown Error" }
+            ), { status: err.status || 500 })
     }
 
 }
