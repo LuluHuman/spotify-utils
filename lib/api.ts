@@ -350,7 +350,6 @@ export class Spotify {
         cache["colors"][albSrc] = req
 
         return req
-
     }
 
     //#region Playback

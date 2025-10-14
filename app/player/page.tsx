@@ -133,32 +133,32 @@ export default function Player() {
 		collectState(trackId, SpotifyClient, state).then((changedState) => {
 			setTrackState(changedState);
 
-			findLyrics(
-				{ SpotifyClient, mxmClient: mxmClient?.current },
-				{
-					uri: changedState.uris.song,
-					title: changedState.original_title || changedState.title,
-					artist: changedState.artist,
-				}
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			).then(({ source, type, data, copyright }: any) => {
-				setTranscript(undefined);
-				if (data == "not-found") return setLyrics(undefined);
+			// findLyrics(
+			// 	{ SpotifyClient, mxmClient: mxmClient?.current },
+			// 	{
+			// 		uri: changedState.uris.song,
+			// 		title: changedState.original_title || changedState.title,
+			// 		artist: changedState.artist,
+			// 	}
+			// 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			// ).then(({ source, type, data, copyright }: any) => {
+			// 	setTranscript(undefined);
+			// 	if (data == "not-found") return setLyrics(undefined);
 
-				// * For ts Calibration
-				// * Violation error wouls occur
-				setTimeout(() => {
-					if (!player_state.is_paused) SpotifyClient.playback("resume");
-				}, 5000);
-				const cpyAttribute = copyright ? "\n" + copyright : "";
-				setLyrics({
-					data,
-					lyricType: type,
-					lyrSource: source,
-					lyrCopyright: cpyAttribute,
-					forSongId: trackId,
-				});
-			});
+			// 	// * For ts Calibration
+			// 	// * Violation error wouls occur
+			// 	setTimeout(() => {
+			// 		if (!player_state.is_paused) SpotifyClient.playback("resume");
+			// 	}, 5000);
+			// 	const cpyAttribute = copyright ? "\n" + copyright : "";
+			// 	setLyrics({
+			// 		data,
+			// 		lyricType: type,
+			// 		lyrSource: source,
+			// 		lyrCopyright: cpyAttribute,
+			// 		forSongId: trackId,
+			// 	});
+			// });
 		});
 
 		collectStateExtra(SpotifyClient, state).then((changedState: SongStateExtra) => {
@@ -188,12 +188,7 @@ export default function Player() {
 						)
 					}>
 					{lyrcs?.data ? (
-						trackState?.id == lyrcs.forSongId && (
-							<LyricView
-								lyrics={lyrcs}
-								// SpotifyClient={SpotifyClient}
-							/>
-						)
+						trackState?.id == lyrcs.forSongId && <LyricView lyrics={lyrcs} />
 					) : (
 						<>{transcript || "No lyrics found"}</>
 					)}
@@ -201,13 +196,22 @@ export default function Player() {
 
 				<div
 					className={
-						"h-full overflow-y-scroll overflow-x-hidden " +
-						(pannelOpen == 1 ? "w-full md:w-96" : " hidden w-full md:w-96 md:block")
-					}>
+						"h-full overflow-y-scroll overflow-x-hidden md:w-96 w-full " +
+						(pannelOpen == 1 ? "" : "hidden md:block")
+					}
+					onClick={(e) => {
+						const button = e.target as HTMLButtonElement;
+
+						const active_device_id = SpotifyClient?.session.activeDeviceId;
+						const uri = button?.getAttribute("uri");
+						const uid = button?.getAttribute("uid");
+
+						if (!active_device_id || !uri || !uid) return;
+						return SpotifyClient?.SkipTo({ active_device_id, uri, uid });
+					}}>
 					<QueueView
 						curInfo={trackState}
 						curInfoExtra={trackExtraState}
-						SpotifyClient={SpotifyClient}
 					/>
 				</div>
 			</div>
@@ -342,11 +346,10 @@ function lyricController(
 			const inRange = curMs >= msStart && !(curMs >= msEnd);
 			const inCloseRange = msStart - curMs < 200 && msStart - curMs > 0;
 
-			classModVal(line, inRange, "lineActive");
-
 			if (!isBackground && inCloseRange)
 				line?.scrollIntoView({ block: "center", behavior: "smooth" });
 
+			classModVal(line, inRange, "lineActive");
 			if (!inRange) continue;
 
 			if (isSyllable) {

@@ -5,12 +5,16 @@ import { cookies } from 'next/headers'
 export async function GET() {
     const cookieStore = cookies()
     const sp_dc = (await cookieStore).get("sp_dc")
+    console.log(sp_dc);
+
 
     return await getToken(sp_dc?.value)
 }
 export async function POST(req: Request) {
     const data = await req.json()
     const cookieStore = await cookies()
+    console.log(data.session);
+
     cookieStore.set({
         name: "sp_dc",
         value: data.session,
@@ -22,7 +26,6 @@ export async function POST(req: Request) {
     });
 
     return await getToken(data.session)
-
 }
 
 async function getToken(sp_dc?: string) {

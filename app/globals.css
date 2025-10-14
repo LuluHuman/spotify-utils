@@ -15,9 +15,12 @@
 .copyable {
 	@apply bg-[#290a50] text-[#d8a3ff] font-bold m-1 p-1 w-fit rounded-2xl cursor-pointer;
 }
+.copyable-color {
+	@apply font-bold m-1 p-1 w-fit rounded-2xl cursor-pointer;
+}
 
 .label {
-	@apply bg-[#dacfe6]  text-black font-bold my-1 mx-2 p-1 w-fit rounded-2xl;
+	@apply bg-[#dacfe6]  text-black font-bold my-1 mx-2 p-1 w-fit rounded-2xl select-none;
 }
 
 .value {
@@ -25,12 +28,12 @@
 }
 
 :root {
-	--image-url: url("/media-fallback.png");
 	--light-color: #5c5c5c;
 	--dark-color: #121212;
 	--gradient-color: 255;
 	--gradient-color-alpha: 0.4;
 	--gradient-color-alpha-active: 1;
+	--gradient-progress: 100%;
 }
 
 .text-right {
@@ -69,6 +72,10 @@
 	@apply text-sm;
 }
 
+.queueItem {
+	@apply text-white w-full transition-all rounded-lg font-bold flex p-2 cursor-pointer hover:bg-neutral-800;
+}
+
 .lyrics-inactive > button {
 	color: rgba(255, 255, 255, var(--gradient-color-alpha));
 	margin-top: 0.25rem;
@@ -90,6 +97,10 @@
 	display: flex;
 	font-size: 2.25rem;
 	line-height: 2.5rem;
+}
+
+.lyricLine {
+	@apply text-xl m-1 w-full;
 }
 .lineActive {
 	--gradient-color-alpha: 1;

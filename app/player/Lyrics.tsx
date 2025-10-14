@@ -58,12 +58,15 @@ function parseLines(
 ) {
 	let element: React.JSX.Element | React.JSX.Element[] | string = rawElement;
 
-	const lineType = isInstrumental ? "instrumental " : `text-xl m-1 w-full `;
-	const lineAignment = isOppositeAligned ? "text-right " : "text-left ";
+	const classes = ["opacity-50"];
+
+	if (isInstrumental) classes.push("instrumental");
+	else classes.push("lyricLine");
+	classes.push(isOppositeAligned ? "text-right" : "text-left");
 
 	if (isInstrumental) {
 		element = (
-			<div className={`instrumentalText animation `}>
+			<div className={"instrumentalText animation"}>
 				<span />
 				<span />
 				<span />
@@ -73,7 +76,7 @@ function parseLines(
 
 	if (showing == "Syllable" && children) {
 		element = children.map(({ msStart, msEnd, element: elementT }) => {
-			const bgClass = isBackground ? "text-sm bg " : "";
+			const bgClass = isBackground ? "bg" : "";
 			return (
 				<span
 					ref={(ref) => {
@@ -90,13 +93,11 @@ function parseLines(
 
 	return (
 		<span
-			className={`${lineType + lineAignment} opacity-50`}
+			className={classes.join(" ")}
 			ref={(ref) => {
 				ref?.setAttribute("start", msStart.toString());
 				ref?.setAttribute("end", msEnd.toString());
-				if (isBackground) ref?.setAttribute("isBackground", "1");
 			}}
-			// onClick={() => SpotifyClient?.SeekTo(Math.ceil(msStart))}
 			key={showing == "Static" ? i : `${msStart} - ${msEnd}: ${element.toString()}`}>
 			{element}
 		</span>

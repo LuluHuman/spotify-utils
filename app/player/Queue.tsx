@@ -1,6 +1,7 @@
 import { NextTrack, SongState, SongStateExtra } from "../../lib/types";
 import { Spotify } from "../../lib/api";
 import Image from "next/image";
+import { Ref } from "react";
 
 function Explicit() {
 	return (
@@ -25,6 +26,7 @@ function SongCard({
 	isExplicit,
 	clickAction,
 	hidden,
+	ref,
 }: {
 	albImg: string;
 	title: string;
@@ -32,11 +34,13 @@ function SongCard({
 	isExplicit: boolean;
 	hidden: string;
 	clickAction?: () => Promise<unknown> | undefined;
+	ref?: Ref<HTMLButtonElement> | undefined;
 }) {
 	return (
 		<button
-			className={"queueItem text-white w-full transition-all rounded-lg font-bold flex py-2"}
-			onClick={clickAction}>
+			className="queueItem"
+			onClick={clickAction}
+			ref={ref}>
 			<Image
 				className="rounded-md size-12 mr-2 bg-[#282828]"
 				alt="queue"
@@ -61,11 +65,9 @@ function SongCard({
 export default function QueueView({
 	curInfo,
 	curInfoExtra,
-	SpotifyClient,
 }: {
 	curInfo?: SongState;
 	curInfoExtra?: SongStateExtra;
-	SpotifyClient?: Spotify;
 }) {
 	if (!curInfo || !curInfoExtra || !curInfoExtra.queue) return <></>;
 
@@ -100,18 +102,6 @@ export default function QueueView({
 						const albImg64 = queueItem.albumOfTrack.coverArt.sources.filter(
 							(x) => x.height == 64
 						)[0];
-						const onclick = () => {
-							if (
-								queueItem.uri.startsWith("spotify:track") ||
-								queueItem.uri.startsWith("spotify:local")
-							) {
-								return SpotifyClient?.SkipTo({
-									active_device_id: curInfo.deviceId,
-									uri: queueItem.uri,
-									uid: queueItem.uid,
-								});
-							}
-						};
 						return (
 							<SongCard
 								hidden={queueItem.hidden_in_queue}
@@ -122,7 +112,15 @@ export default function QueueView({
 									.join(", ")}
 								isExplicit={queueItem.contentRating.label == "EXPLICIT"}
 								key={label + "-" + i}
-								clickAction={onclick}
+								ref={(ref) => {
+									if (
+										queueItem.uri.startsWith("spotify:track") ||
+										queueItem.uri.startsWith("spotify:local")
+									) {
+										ref?.setAttribute("uri", queueItem.uri);
+										ref?.setAttribute("uid", queueItem.uid);
+									}
+								}}
 							/>
 						);
 					}),

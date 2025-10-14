@@ -3,7 +3,7 @@
 
 import axios from "axios";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { CSSProperties, MouseEvent, useCallback, useEffect, useState } from "react";
 import { useSession } from "../layout";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -17,22 +17,37 @@ export default function TrackInfo() {
 	const [id, setId] = useState<string>(queryId || "0laMYIfB9WohTEOTjG6RDz");
 	const [data, setData] = useState<any>();
 	const [images, setImages] = useState<{ url: string; size: number }[]>();
+	const [colors, setColors] = useState<{
+		colorDark: string;
+		colorLight: string;
+		colorRaw: string;
+	}>();
 
-	const search = useCallback(
-		() =>
-			axios
-				.get("/api/search?id=" + id, { headers: { Authorization: "Bearer " + token } })
-				.then((res) => {
-					const d = res.data;
-					setData(d);
-				}),
-		[id, token]
-	);
+	const search = useCallback(() => {
+		axios
+			.get("/api/search?id=" + id, { headers: { Authorization: "Bearer " + token } })
+			.then((res) => {
+				const d = res.data;
+				setData(d);
+				SpotifyClient?.getColors(
+					"https://i.scdn.co/image/" + d.metaAlbum.cover_group.image[0].file_id
+				).then((fetchColours: any) => {
+					const Colors = fetchColours?.data
+						? fetchColours.data.extractedColors[0]
+						: undefined;
+					setColors({
+						colorDark: Colors.colorDark.hex,
+						colorLight: Colors.colorLight.hex,
+						colorRaw: Colors.colorRaw.hex,
+					});
+				});
+			});
+	}, [SpotifyClient, id, token]);
 
 	useEffect(() => {
 		SpotifyClient?.addReadyListener(() => {
 			setToken(SpotifyClient.session.accessToken);
-			if (queryId && token) search();
+			if (queryId && queryId == id && token) search();
 		});
 	}, [SpotifyClient, search, queryId, token]);
 
@@ -40,6 +55,7 @@ export default function TrackInfo() {
 		router.replace("/track-info?id=" + id);
 		search();
 	}
+
 	const { day, month, year } = data ? data.metaAlbum.date : {};
 	const earliest_live_album = data
 		? new Date(data?.metaAlbum.earliest_live_timestamp * 1000).toLocaleString("en-GB", {
@@ -60,18 +76,17 @@ export default function TrackInfo() {
 				const element = e.target as HTMLParagraphElement;
 				if (!element.classList) return;
 
+				const isColorCopyable = element.classList.contains("copyable-color");
+				if (isColorCopyable) {
+					navigator.clipboard.writeText(element.id);
+					popup(e, "Copied Hex");
+					return;
+				}
+
 				const isCopyable = element.classList.contains("copyable");
 				if (!isCopyable) return;
 				navigator.clipboard.writeText(element.textContent);
-
-				const toast = document.createElement("span");
-				toast.textContent = "Copied";
-				toast.style = `position: absolute; left:${e.pageX}px; top:${e.pageY}px; background-color: #cbf55c; color: #290a50; padding: 2px 10px; border-radius: 10px`;
-				document.body.appendChild(toast);
-
-				setTimeout(() => {
-					toast.remove();
-				}, 500);
+				popup(e, "Copied");
 			}}>
 			<search className="Search">
 				<label htmlFor="track-id">Id</label>
@@ -130,7 +145,7 @@ export default function TrackInfo() {
 				<article>
 					<div className="flex flex-wrap m-3">
 						<h1 className="w-full text-3xl text-center font-bold">Album Info</h1>
-						<div className="flex items-center">
+						<div className="flex items-center justify-center w-full md:w-fit">
 							<Image
 								onClick={() => {
 									setImages(
@@ -152,11 +167,10 @@ export default function TrackInfo() {
 							/>
 						</div>
 						<div className=" *:my-2 flex-[1]">
-							<p>
-								<span className="value"> {data.metaAlbum.type}</span>
-							</p>
 							<div>
-								<p className="text-2xl copyable">{data.metaAlbum.name}</p>
+								<p className="text-2xl line-clamp-2 copyable">
+									{data.metaAlbum.name}
+								</p>
 							</div>
 							{data.metaAlbum.name != data.metaAlbum.original_title && (
 								<p>
@@ -166,15 +180,22 @@ export default function TrackInfo() {
 									</span>
 								</p>
 							)}
+
+							<p>
+								<span className="label">Type</span>
+								<span className="value">{data.metaAlbum.type}</span>
+							</p>
 							<p>
 								<span className="label">Artist</span>
-								{data.metaAlbum.artist.map((a: any, i: number) => (
-									<span
-										key={i}
-										className="copyable">
-										{a.name}
-									</span>
-								))}
+								<span className="flex flex-wrap w-fit">
+									{data.metaAlbum.artist.map((a: any, i: number) => (
+										<span
+											key={i}
+											className="copyable">
+											{a.name}
+										</span>
+									))}
+								</span>
 							</p>
 							<p>
 								<span className="label">Released on</span>
@@ -184,9 +205,32 @@ export default function TrackInfo() {
 							</p>
 							<p>
 								<span className="label">Released to stream</span>
-								<span className="value"> {earliest_live_album}</span>
+								<span className="value">{earliest_live_album}</span>
 							</p>
-
+							<p>
+								<span className="label">Colors</span>
+								{colors &&
+									Object.keys(colors).map((name) => {
+										const hex =
+											colors[name as "colorDark" | "colorLight" | "colorRaw"];
+										const textColor = name.includes("Dark")
+											? "text-white"
+											: "text-black";
+										return (
+											<span
+												id={hex}
+												key={name}
+												className={`bg-[var(--bg-color)] ${textColor} copyable-color`}
+												style={
+													{
+														"--bg-color": hex,
+													} as CSSProperties
+												}>
+												{name}
+											</span>
+										);
+									})}
+							</p>
 							<p>
 								<span className="label">Label</span>
 								<span className="copyable">{data.metaAlbum.label}</span>
@@ -215,7 +259,9 @@ export default function TrackInfo() {
 						<h1 className="w-full text-3xl text-center font-bold">Track Info</h1>
 						<div className=" *:my-2 flex-[1]">
 							<div>
-								<p className="text-2xl copyable">{data.metaTrack.name}</p>
+								<p className="text-2xl line-clamp-2 copyable">
+									{data.metaTrack.name}
+								</p>
 							</div>
 							{data.metaTrack.name != data.metaTrack.original_title && (
 								<p>
@@ -274,4 +320,15 @@ function msToMinSec(ms: number) {
 	const sec = Math.floor((secTotal / 60 - min) * 60);
 	// return ms;
 	return min + ":" + sec;
+}
+
+function popup(e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>, text: string) {
+	const toast = document.createElement("span");
+	toast.textContent = text;
+	toast.style = `position: absolute; left:${e.pageX}px; top:${e.pageY}px; background-color: #cbf55c; color: #290a50; padding: 2px 10px; border-radius: 10px`;
+	document.body.appendChild(toast);
+
+	setTimeout(() => {
+		toast.remove();
+	}, 500);
 }
