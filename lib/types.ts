@@ -358,3 +358,23 @@ export interface User {
     "type": "user",
     "uri": string
 }
+
+export interface UserProfile {
+    "data": {
+        "me": {
+            "profile": {
+                "avatar": {
+                    "sources": {
+                        "height": number,
+                        "url": string,
+                        "width": number
+                    }[]
+                },
+                "avatarBackgroundColor": number,
+                "name": string
+                "uri": string
+                "username": string
+            }
+        }
+    }
+}

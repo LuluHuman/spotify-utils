@@ -59,14 +59,14 @@ export default function TrackInfo() {
 	const { day, month, year } = data ? data.metaAlbum.date : {};
 	const earliest_live_album = data
 		? new Date(data?.metaAlbum.earliest_live_timestamp * 1000).toLocaleString("en-GB", {
-				dateStyle: "short",
-		  })
+			dateStyle: "short",
+		})
 		: "";
 
 	const earliest_live_track = data
 		? new Date(data?.metaTrack.earliest_live_timestamp * 1000).toLocaleString("en-GB", {
-				dateStyle: "short",
-		  })
+			dateStyle: "short",
+		})
 		: "";
 	return (
 		<div
@@ -289,7 +289,11 @@ export default function TrackInfo() {
 							<p>
 								<span className="label">Track No</span>
 								<span className="copyable">{data.metaTrack.number}</span>of
-								<span className="copyable">{data.track.album.total_tracks}</span>
+								<span className="copyable">{
+									data.metaAlbum.disc
+										.map((disk: {track:any[]}) => disk.track.length) 
+										.reduce((t: number, c: number) => t + c, 0)
+								}</span>
 							</p>
 							<p>
 								<span className="label">Released to stream</span>

@@ -1,13 +1,13 @@
 "use client";
 
 import { Spotify } from "@/lib/api";
-import { User } from "@/lib/types";
+import { User, UserProfile } from "@/lib/types";
 import Image from "next/image";
 import { useState } from "react";
 
 export default function Login() {
 	const [token, setToken] = useState<string>("");
-	const [user, setUser] = useState<User>();
+	const [user, setUser] = useState<UserProfile>();
 	const [error, setError] = useState<string>();
 	function onClick() {
 		fetch("/api/session", {
@@ -44,13 +44,13 @@ export default function Login() {
 						<h1 className="font-bold text-2xl mb-8">Logged in as</h1>
 						<Image
 							className="rounded-full size-12"
-							width={user.images[1].width}
-							height={user.images[1].height}
+							width={user.data.me.profile.avatar.sources[1].width}
+							height={user.data.me.profile.avatar.sources[1].height}
 							unoptimized={true}
-							src={user.images[1].url}
+							src={user.data.me.profile.avatar.sources[1].url}
 							alt="User Image"
 						/>
-						<span className="mb-8">{user.display_name}</span>
+						<span className="mb-8">{user.data.me.profile.name}</span>
 
 						<button className="bg-[#1ed760] text-[#121212] font-bold text-base px-8 py-2 my-4 rounded-full">
 							Redirecting...

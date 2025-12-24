@@ -19,7 +19,7 @@ const SpotifyContext = createContext<{
 	setSpotifyClient: React.Dispatch<React.SetStateAction<Spotify | undefined>>;
 }>({
 	SpotifyClient: undefined,
-	setSpotifyClient: () => {},
+	setSpotifyClient: () => { },
 });
 
 export const useSession = () => useContext(SpotifyContext);
@@ -36,21 +36,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 			if (!stfClient.session.accessToken) return alert("Error: No Spotify Access Token");
 			if (stfClient.session.isAnonymous) return setUsername(undefined);
 			stfClient.getMe().then((me) => {
-				setUsername(me.display_name);
+				setUsername(me.data.me.profile.name);
 			});
-			// const wsDealer = "dealer.spotify.com";
-			// const wsUrl = `wss://${wsDealer}/?access_token=${SpotifyClient.session.accessToken}`;
-			// const spWs = new WebSocket(wsUrl);
-			// spWs.onmessage = (event) => {
-			// 	const data = JSON.parse(event.data) as SpotifyWebhook;
-			// 	if (!data.headers) return;
-			// 	const stfConnectionId = data.headers["Spotify-Connection-Id"];
-			// 	if (!stfConnectionId) return setPlayerState(data.payloads[0].cluster);
-			// 	SpotifyClient.connectWs(stfConnectionId).then((state) => {
-			// 		console.info("Successfully connect to websocket");
-			// 		setPlayerState(state);
-			// 	});
-			// };
 		});
 		setSpotifyClient(stfClient);
 	}, []);
@@ -87,9 +74,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 					</div>
 				</header>
 				<header
-					className={`bg-[#400073] text-white p-3 md:hidden *:flex-col *:w-full *:items-center ${
-						menuOpened ? "" : "hidden"
-					}`}>
+					className={`bg-[#400073] text-white p-3 md:hidden *:flex-col *:w-full *:items-center ${menuOpened ? "" : "hidden"
+						}`}>
 					<TopBar menuEntries={menuEntries} />
 				</header>
 				<SpotifyContext.Provider value={{ SpotifyClient, setSpotifyClient }}>

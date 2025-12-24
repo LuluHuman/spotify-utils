@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { User } from "./types";
+import { UserProfile } from "./types";
 
 const host = {
     "pub": "https://api.spotify.com/v1",
@@ -15,7 +15,8 @@ const hashes = {
     "fetchExtractedColors": "86bdf61bb598ee07dc85d6c3456d9c88eb94f33178509ddc9b33fc9710aa9e9c",
     "canvas": "1b1e1915481c99f4349af88268c6b49a2b601cf0db7bca8749b5dd75088486fc",
     "libraryV3": "e25e473b160efdd4ababa7d98aa909ce0e5ab9c49c81f6d040da077a09e34ab3",
-    "userTopContent": "feb6d55177e2cbce2ac59214f9493f1ef2e4368eec01b3d4c3468fa1b97336e2"
+    "userTopContent": "feb6d55177e2cbce2ac59214f9493f1ef2e4368eec01b3d4c3468fa1b97336e2",
+    "profileAttributes": "53bcb064f6cd18c23f752bc324a791194d20df612d8e1239c735144ab0399ced"
 }
 // interface lyrLine {
 //     StartTime: number;
@@ -215,8 +216,10 @@ export class Spotify {
 
 
     //#region Me
-    getMe(): Promise<User> { return this.makeRequest(host.pub + "/me") as Promise<User> }
-    // getPlayer() { return this.makeRequest(host.pub + "/me/player") } depricated
+    getMe(): Promise<UserProfile> {
+        return this.operation("profileAttributes", {}) as Promise<UserProfile>
+    }
+
     setDevice(deviceId: string) {
         return this.makeRequest(host.pub + "/me/player", {
             method: "PUT", body: JSON.stringify({ "device_ids": [deviceId] })

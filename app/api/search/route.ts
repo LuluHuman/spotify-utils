@@ -10,13 +10,13 @@ export async function GET(req: NextRequest) {
         if (!accessToken) return Response.json({ err: "No Auth" }, { status: 400 })
         if (!trackId) return Response.json({ err: "No query id" }, { status: 400 })
 
-        const { getTrack, getTrackMeta, getAlbum } = init(accessToken)
+        const { getTrackMeta, getAlbum } = init(accessToken)
 
-        const track = (await getTrack(trackId)).data
+        // const track = (await getTrack(trackId)).data
         const metaTrack = (await getTrackMeta(idToGid(trackId))).data
         const metaAlbum = (await getAlbum(metaTrack.album.gid)).data
 
-        return Response.json({ track, metaTrack, metaAlbum })
+        return Response.json({ metaTrack, metaAlbum })
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -42,9 +42,9 @@ function idToGid(id: string) {
 function init(accessToken: string) {
     console.log(accessToken);
 
-    function getTrack(trackId: string) {
-        return axios.get("https://api.spotify.com/v1/tracks/" + trackId, { headers: { Authorization: accessToken } })
-    }
+    // function getTrack(trackId: string) {
+    //     return axios.get("https://api.spotify.com/v1/tracks/" + trackId, { headers: { Authorization: accessToken } })
+    // }
 
     function getTrackMeta(trackGid: string) {
         const url = `https://spclient.wg.spotify.com/metadata/4/track/${trackGid}`
@@ -56,5 +56,5 @@ function init(accessToken: string) {
         return axios.get(url, { headers: { Authorization: accessToken } })
     }
 
-    return { getTrack, getTrackMeta, getAlbum }
+    return { getTrackMeta, getAlbum }
 }
